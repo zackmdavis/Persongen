@@ -27,16 +27,30 @@ impl Sex {
 #[derive(Clone, Debug)]
 struct Person {
     sex: Sex,
+    extraversion: f64,
     agreeableness: f64,
+    conscientiousness: f64,
     neuroticism: f64,
+    openness: f64,
 }
 
 impl Rand for Person {
     fn rand<R: rand::Rng>(rng: &mut R) -> Self {
+        // Table 2 from http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3149680/
+        let mut female_extraversion = Gaussian::from_std_dev(3.42, 0.59);
+        let mut male_extraversion = Gaussian::from_std_dev(3.37, 0.55);
+
         let mut female_agreeableness = Gaussian::from_std_dev(3.89, 0.50);
         let mut male_agreeableness = Gaussian::from_std_dev(3.65, 0.50);
+
+        let mut female_conscientiousness = Gaussian::from_std_dev(3.35, 0.58);
+        let mut male_conscientiousness = Gaussian::from_std_dev(3.32, 0.54);
+
         let mut female_neuroticism = Gaussian::from_std_dev(2.94, 0.67);
         let mut male_neuroticism = Gaussian::from_std_dev(2.68, 0.65);
+
+        let mut female_openness = Gaussian::from_std_dev(3.61, 0.52);
+        let mut male_openness = Gaussian::from_std_dev(3.60, 0.51);
 
         let coin: f64 = rng.gen();
         let sex = if coin < 0.5 { Sex::Female } else { Sex::Male };
@@ -45,15 +59,21 @@ impl Rand for Person {
             Sex::Female => {
                 Person {
                     sex: Sex::Female,
+                    extraversion: female_extraversion.sample(rng),
                     agreeableness: female_agreeableness.sample(rng),
+                    conscientiousness: female_conscientiousness.sample(rng),
                     neuroticism: female_neuroticism.sample(rng),
+                    openness: female_openness.sample(rng),
                 }
             },
             Sex::Male => {
                 Person {
                     sex: Sex::Male,
+                    extraversion: male_extraversion.sample(rng),
                     agreeableness: male_agreeableness.sample(rng),
+                    conscientiousness: male_conscientiousness.sample(rng),
                     neuroticism: male_neuroticism.sample(rng),
+                    openness: male_openness.sample(rng),
                 }
             }
         }
@@ -87,11 +107,16 @@ fn main() {
                 classification_representation.extend_from_slice(&[0., 1.]);
             }
         }
-        measurement_representation.push(training_point.agreeableness);
-        measurement_representation.push(training_point.neuroticism);
+        measurement_representation.extend_from_slice(
+            &[training_point.extraversion,
+              training_point.agreeableness,
+              training_point.conscientiousness,
+              training_point.neuroticism,
+              training_point.openness]
+        );
     }
 
-    let training_matrix = Matrix::new(training_set_size, 2,
+    let training_matrix = Matrix::new(training_set_size, 5,
                                       measurement_representation);
     let target_matrix = Matrix::new(training_set_size, 2,
                                     classification_representation);
@@ -104,11 +129,14 @@ fn main() {
     let mut validation_representation = Vec::new();
     for validation_point in &validation_set {
         validation_representation.extend_from_slice(
-            &[validation_point.agreeableness,
-              validation_point.neuroticism]
+            &[validation_point.extraversion,
+              validation_point.agreeableness,
+              validation_point.conscientiousness,
+              validation_point.neuroticism,
+              validation_point.openness]
         );
     }
-    let validation_matrix = Matrix::new(validation_set_size, 2,
+    let validation_matrix = Matrix::new(validation_set_size, 5,
                                         validation_representation);
 
     let predictions = model.predict(&validation_matrix);
