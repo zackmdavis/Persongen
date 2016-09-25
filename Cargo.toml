@@ -5,4 +5,4 @@ authors = ["Zack M. Davis <code@zackmdavis.net>"]
 
 [dependencies]
 rand = "0.3"
-rusty-machine = { version = "0.4", features = ["stats"] }
+rusty-machine = "0.4"

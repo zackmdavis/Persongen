@@ -1,12 +1,12 @@
-extern crate rusty_machine;
 extern crate rand;
+extern crate rusty_machine;
 
 use rand::Rand;
 use rand::distributions::Sample;
+use rand::distributions::normal::Normal;
 use rusty_machine::learning::naive_bayes::{self, NaiveBayes};
 use rusty_machine::linalg::Matrix;
 use rusty_machine::learning::SupModel;
-use rusty_machine::stats::dist::gaussian::Gaussian;
 
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -37,20 +37,20 @@ struct Person {
 impl Rand for Person {
     fn rand<R: rand::Rng>(rng: &mut R) -> Self {
         // Table 2 from http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3149680/
-        let mut female_extraversion = Gaussian::from_std_dev(3.42, 0.59);
-        let mut male_extraversion = Gaussian::from_std_dev(3.37, 0.55);
+        let mut female_extraversion = Normal::new(3.42, 0.59);
+        let mut male_extraversion = Normal::new(3.37, 0.55);
 
-        let mut female_agreeableness = Gaussian::from_std_dev(3.89, 0.50);
-        let mut male_agreeableness = Gaussian::from_std_dev(3.65, 0.50);
+        let mut female_agreeableness = Normal::new(3.89, 0.50);
+        let mut male_agreeableness = Normal::new(3.65, 0.50);
 
-        let mut female_conscientiousness = Gaussian::from_std_dev(3.35, 0.58);
-        let mut male_conscientiousness = Gaussian::from_std_dev(3.32, 0.54);
+        let mut female_conscientiousness = Normal::new(3.35, 0.58);
+        let mut male_conscientiousness = Normal::new(3.32, 0.54);
 
-        let mut female_neuroticism = Gaussian::from_std_dev(2.94, 0.67);
-        let mut male_neuroticism = Gaussian::from_std_dev(2.68, 0.65);
+        let mut female_neuroticism = Normal::new(2.94, 0.67);
+        let mut male_neuroticism = Normal::new(2.68, 0.65);
 
-        let mut female_openness = Gaussian::from_std_dev(3.61, 0.52);
-        let mut male_openness = Gaussian::from_std_dev(3.60, 0.51);
+        let mut female_openness = Normal::new(3.61, 0.52);
+        let mut male_openness = Normal::new(3.60, 0.51);
 
         let coin: f64 = rng.gen();
         let sex = if coin < 0.5 { Sex::Female } else { Sex::Male };
