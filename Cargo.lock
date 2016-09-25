@@ -3,7 +3,7 @@ name = "persongen"
 version = "0.0.1"
 dependencies = [
  "rand 0.3.14 (registry+https://github.com/rust-lang/crates.io-index)",
- "rusty-machine 0.4.4 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rusty-machine 0.4.4 (git+https://github.com/AtheMathmo/rusty-machine.git)",
 ]
 
 [[package]]
@@ -58,7 +58,7 @@ dependencies = [
 
 [[package]]
 name = "rulinalg"
-version = "0.2.2"
+version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "matrixmultiply 0.1.9 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -68,10 +68,10 @@ dependencies = [
 [[package]]
 name = "rusty-machine"
 version = "0.4.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
+source = "git+https://github.com/AtheMathmo/rusty-machine.git#f5331a0f5fc99e1f5384fcbae28d7e7da23e1878"
 dependencies = [
  "num 0.1.35 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.3.14 (registry+https://github.com/rust-lang/crates.io-index)",
- "rulinalg 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rulinalg 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 

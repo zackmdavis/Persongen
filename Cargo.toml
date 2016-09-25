@@ -5,4 +5,4 @@ authors = ["Zack M. Davis <code@zackmdavis.net>"]
 
 [dependencies]
 rand = "0.3"
-rusty-machine = "0.4"
+rusty-machine = { git = "https://github.com/AtheMathmo/rusty-machine.git" }
