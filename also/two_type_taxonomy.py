@@ -2,12 +2,29 @@ import random
 from enum import Enum
 
 import attr
+import matplotlib.pyplot as plot
+import numpy
+
+from mpl_toolkits.mplot3d import Axes3D
 from numpy.random import normal
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
 
 Sex = Enum('Sex', [
     'female', # ♀
     'male', # ♂
 ])
+
+class GenderBinaryException(ValueError):
+    pass
+
+def encode_sex(sex):
+    if sex == Sex.female:
+        return 0
+    elif sex == Sex.male:
+        return 1
+    else:
+        raise GenderBinaryException()
 
 @attr.s
 class TransWoman:
@@ -24,6 +41,16 @@ class TransWoman:
     agp_hundreds = attr.ib()
     married_before_srs = attr.ib()
     sire_before_srs = attr.ib()
+
+    def to_data_row(self):
+        # Note: excluding pre-SRS partners, marriage, sire.
+        return [self.age_at_srs,
+                self.age_at_first_wish,
+                self.age_at_full_time,
+                self.duration_of_rlt,
+                int(self.femme_child),
+                int(self.femme_child_to_others),
+                int(self.agp_hundreds)]
 
 # data ... um, let's say "inspired by" Lawrence 2005, "Sexuality Before and
 # After Male-to-Female Sex Reassignment Surgery", Table VI
@@ -79,3 +106,57 @@ def make_lesbian():
         married_before_srs=(random.random() < 0.74),
         sire_before_srs=(random.random() < 0.42)
     )
+
+
+def make_data():
+    data = []
+    target = []
+    for group_code, factory in enumerate([make_straight, make_bi, make_lesbian]):
+        for _ in range(250):
+            data.append(factory().to_data_row())
+            target.append(group_code)
+    return (numpy.array(data), target)
+
+
+def plot_data(data, target):
+    figure = plot.figure(figsize=(4, 3))
+    axes = Axes3D(figure)
+
+    reduced_data = PCA(n_components=3).fit_transform(data)
+
+    axes.scatter(reduced_data[:, 0], reduced_data[:, 1], reduced_data[:, 2],
+                 c=target)
+
+    axes.set_xlabel("first eigenvector")
+    axes.set_ylabel("second eigenvector")
+    axes.set_zlabel("third eigenvector")
+
+    plot.show()
+
+
+def two_means_prediction(data, target):
+    model = KMeans(n_clusters=2)
+    model.fit(data)
+    prediction_records = [
+        # XXX HACK: we don't know which group the KMeans classifier will code
+        # as 0 vs. 1, so let's just try both interpretations; the one with a
+        # better score will be the correct one
+        [model.labels_[i] == target[i] for i in range(len(target))],
+        [model.labels_[i] != target[i] for i in range(len(target))]
+    ]
+
+    def prediction_fraction(record):
+        return len([p for p in record if p])/len(record)
+
+    return max(prediction_fraction(record) for record in prediction_records)
+
+
+if __name__ == "__main__":
+    data, target = make_data()
+
+    # lump together ♀/♀ and ♀/♂ pre-/post- SRS attraction groups together for
+    # k-means (k=2) analysis
+    bitarget = [1 if t == 2 else t for t in target]
+    print("fraction correct: {}".format(two_means_prediction(data, bitarget)))
+
+    plot_data(data, target)
