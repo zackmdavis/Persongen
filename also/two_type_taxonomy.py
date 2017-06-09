@@ -1,3 +1,5 @@
+# requires sckikit-learn, matplotlib
+
 import random
 from enum import Enum
 
