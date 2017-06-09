@@ -1,4 +1,5 @@
-# requires sckikit-learn, matplotlib
+# requires Python 3.4+ (or enum backport), attrs
+# (http://www.attrs.org/en/stable/), sckikit-learn, matplotlib
 
 import random
 from enum import Enum
