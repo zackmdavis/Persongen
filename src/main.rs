@@ -7,27 +7,6 @@ use rand::distributions::normal::Normal;
 use rusty_machine::prelude::*;
 use rusty_machine::learning::naive_bayes::{self, NaiveBayes};
 
-// named field pun macro thanks to @durka
-// https://github.com/rust-lang/rfcs/pull/1682#issuecomment-241301350
-macro_rules! make {
-    (@ { $(,)* } $finished:expr) => {
-        $finished
-    };
-    (@ { #[$attr:meta] $($rest:tt)* } $strukt:ident { $($out:tt)* }) => {
-        make!(@ { $($rest)* } $strukt { $($out)* #[$attr] })
-    };
-    (@ { $name:ident: $val:expr, $($rest:tt)* } $strukt:ident { $($out:tt)* }) => {
-        make!(@ { $($rest)* } $strukt { $($out)* $name: $val, })
-    };
-    (@ { $name:ident, $($rest:tt)* } $strukt:ident { $($out:tt)* }) => {
-        make!(@ { $($rest)* } $strukt { $($out)* $name: $name, })
-    };
-
-    ($strukt:ident { $($field:tt)* }) => {
-        make!(@ { $($field)* , } $strukt { })
-    }
-}
-
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Sex {
@@ -123,12 +102,12 @@ impl Rand for Person {
         let openness = intellect +
             personality_structure.residual_openness.sample(rng);
 
-        make!(Person { sex,
-                       enthusiasm, assertiveness,
-                       compassion, politeness,
-                       industriousness, orderliness,
-                       volatility, withdrawal,
-                       intellect, openness })
+        Person { sex,
+                 enthusiasm, assertiveness,
+                 compassion, politeness,
+                 industriousness, orderliness,
+                 volatility, withdrawal,
+                 intellect, openness }
     }
 }
 
