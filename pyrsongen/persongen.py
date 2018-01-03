@@ -96,18 +96,15 @@ def model_population(test, validation):
 
 
 def plot_data(data, target):
-    figure = plot.figure(figsize=(4, 3))
+    figure = plot.figure(figsize=(6, 5))
     axes = Axes3D(figure)
 
-    reduced_data = PCA(n_components=3).fit_transform(data)
-
-    axes.scatter(reduced_data[:, 0], reduced_data[:, 1], reduced_data[:, 2],
+    axes.scatter(data[:, 0], data[:, 1], data[:, 2],
                  c=target, cmap=ListedColormap(["#FF1493", "#1E90FF"]))
 
-    # XXX: double-check that these axes are labeled correctly
-    axes.set_xlabel("first eigenvector")
-    axes.set_ylabel("second eigenvector")
-    axes.set_zlabel("third eigenvector")
+    axes.set_xlabel("Agreeableness")
+    axes.set_ylabel("Neuroticism")
+    axes.set_zlabel("people–things orientation")
 
     plot.show()
 
@@ -116,5 +113,5 @@ if __name__ == "__main__":
     test, validation = simulate_population(5000), simulate_population(5000)
     model_population(test, validation)
 
-    plot_population = simulate_population(100)
+    plot_population = simulate_population(300)
     plot_data(data_array(plot_population), target_array(plot_population))
