@@ -2,9 +2,14 @@ import itertools
 import random
 from enum import IntEnum
 
-from sklearn.naive_bayes import GaussianNB
+import matplotlib.pyplot as plot
+from matplotlib.colors import ListedColormap
+from mpl_toolkits.mplot3d import Axes3D
 from numpy import array
 from numpy.random import normal
+from sklearn.naive_bayes import GaussianNB
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
 
 
 Sex = IntEnum('Sex', [
@@ -51,31 +56,65 @@ class Person:
 
 def simulate_population(size):
     return (
-        [Person.generate_female() for _ in range(size)] +
-        [Person.generate_male() for _ in range(size)]
+        [Person.generate_female() for _ in range(size//2)] +
+        [Person.generate_male() for _ in range(size//2)]
     )
+
+
+def data_array(population):
+    return array([person.trait_vector() for person in population])
+
+
+def target_array(population):
+    return array([int(person.sex) for person in population])
 
 
 def model_population(test, validation):
     model = GaussianNB()
-    test_data = array([person.trait_vector() for person in test])
-    test_target = array([int(person.sex) for person in test])
+    test_data = data_array(test)
+    test_target = target_array(test)
     model.fit(test_data, test_target)
 
     validation_data = array([person.trait_vector() for person in validation])
     validation_target = array([int(person.sex) for person in validation])
 
-    predictions = model.predict(validation_data)
+    point_predictions = model.predict(validation_data)
+    log_prob_predictions = model.predict_log_proba(validation_data)
+    prob_predictions = model.predict_proba(validation_data)
 
     hits = 0
-    for person, predicted in zip(validation, predictions):
-        print("Person traits: {}; predicted: {}; actual: {}".format(person.trait_vector(), predicted, person.sex))
+    bits = 0
+    for person, predicted, log_probs, probs in zip(validation, point_predictions, log_prob_predictions, prob_predictions):
+        print("Person traits: {}; predicted: {}; actual: {}; probabilities: {}".format(person.trait_vector(), predicted, person.sex, probs))
         if predicted == person.sex:
             hits += 1
 
+        bits += log_probs[person.sex-1]
+
     print("total accuracy {}/{} = {}%".format(hits, len(validation), hits/len(validation)*100))
+    print("Bayes-score {} bits".format(bits))
+
+
+def plot_data(data, target):
+    figure = plot.figure(figsize=(4, 3))
+    axes = Axes3D(figure)
+
+    reduced_data = PCA(n_components=3).fit_transform(data)
+
+    axes.scatter(reduced_data[:, 0], reduced_data[:, 1], reduced_data[:, 2],
+                 c=target, cmap=ListedColormap(["#FF1493", "#1E90FF"]))
+
+    # XXX: double-check that these axes are labeled correctly
+    axes.set_xlabel("first eigenvector")
+    axes.set_ylabel("second eigenvector")
+    axes.set_zlabel("third eigenvector")
+
+    plot.show()
 
 
 if __name__ == "__main__":
-    print(Person.generate_male())
-    model_population(simulate_population(10000), simulate_population(10000))
+    test, validation = simulate_population(5000), simulate_population(5000)
+    model_population(test, validation)
+
+    plot_population = simulate_population(100)
+    plot_data(data_array(plot_population), target_array(plot_population))
